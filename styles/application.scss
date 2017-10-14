@@ -1,2 +1,10 @@
 // This is the top-level scss file. Import all other files in here.
 @import 'home';
+
+html, body {
+    height: 100%;
+}
+
+#react-root {
+    height: 100%;
+}

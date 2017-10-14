@@ -38,9 +38,14 @@
     "webpack-dev-server": "^2.4.4"
   },
   "dependencies": {
+    "axios": "^0.16.2",
     "babel-loader": "^7.0.0",
+    "flexbox-grid": "^1.0.0",
+    "material-ui": "^0.19.4",
     "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react-dom": "^15.5.4",
+    "truffle-contract": "^3.0.0",
+    "web3": "^1.0.0-beta.23"
   },
   "main": "server.js"
 }
