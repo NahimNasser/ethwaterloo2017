@@ -1,6 +1,10 @@
 pragma solidity ^0.4.2;
+import "./usingOraclize.sol";
+import "./strings.sol";
+/*import "../installed_contracts/oraclize/contracts/usingOraclize.sol";*/
 
-contract GitBounty {
+contract GitBounty is usingOraclize {
+    using strings for *;
 
     bytes32 public key;
     address public owner;
@@ -13,7 +17,7 @@ contract GitBounty {
     uint256 public requiredNumberOfVotes;
     bool public isBountyOpen;
     mapping (bytes32 => bool) private hasVotedToAddress;
-
+    bytes32 private queryId;
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
@@ -30,18 +34,20 @@ contract GitBounty {
         require(!hasVoted(voter, hunter));
         _;
     }
-    function GitBounty(bytes32 issueUrl, address[] voters,uint256  expiresIn ) public payable {
-        key = issueUrl;
-        isBountyOpen = true;
-        expiresAt += expiresIn + now;
-        totalBounty += msg.value;
-        owner = msg.sender;
-        voterAddresses = voters;
-        requiredNumberOfVotes = (voterAddresses.length / 2 )  + 1;
-        for (uint256 i=0; i < voterAddresses.length; i++ ){
-            eligibleVotersAddresses[voterAddresses[i]] = true;
-        }
-        contributions[msg.sender] += msg.value;
+    modifier isOraclize {
+        require(msg.sender == oraclize_cbAddress());
+        _;
+    }
+    function GitBounty(bytes32 issueUrl ,uint256  expiresIn ) public payable {
+      require((msg.value >= 1 ether));
+
+      key = issueUrl;
+      expiresAt += expiresIn + now;
+      totalBounty += msg.value;
+      owner = msg.sender;
+
+      contributions[msg.sender] += msg.value;
+      var queryId = oraclize_query("URL", "https://raw.githubusercontent.com/NahimNasser/ethwaterloo2017/master/.voters", 300000);
     }
     function addToBounty() public payable bountyOpen {
         contributions[msg.sender] += msg.value;
@@ -63,6 +69,20 @@ contract GitBounty {
     }
     function hasVoted(address voter, address hunter) private constant returns (bool) {
         return hasVotedToAddress[keccak256(voter, hunter)];
+    }
+    function __callback(bytes32 myid, string result) public isOraclize{
+        isBountyOpen = true;
+        var s = result.toSlice();
+        var delim = ",".toSlice();
+        var parts = new address[](s.count(delim) + 1);
+        for(uint i = 0; i < parts.length; i++) {
+            parts[i] = parseAddr(s.split(delim).toString());
+        }
+        voterAddresses = parts;
+        requiredNumberOfVotes = (voterAddresses.length / 2 )  + 1;
+        for (uint256 c=0; c < voterAddresses.length; c++ ){
+          eligibleVotersAddresses[voterAddresses[c]] = true;
+        }
     }
 
 }
