@@ -1,19 +1,20 @@
 import Axios from 'axios'
 import Web3 from 'web3'
 import TruffleContract from 'truffle-contract'
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import AppBar from 'material-ui/AppBar'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import TextField from 'material-ui/TextField'
 
 import bounties from '../bounties.json'
+import GitBountyJson from '../build/contracts/GitBounty.json'
 
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(provider)
 const contracts = {}
 
-contracts.GitBounty = TruffleContract(bounties)
+contracts.GitBounty = new web3.eth.Contract(GitBountyJson.abi, "0x03a912af59f51c88ba32e50c1fc45b3b3c3b4c77")
 // Set the provider for our contract
 contracts.GitBounty.setProvider(provider)
 
@@ -43,9 +44,9 @@ class App extends Component {
       dialogOpen: true
     })
   }
-  
+
   _handleSubmit() {
-    
+
   }
 
   _markVoted() {
@@ -56,18 +57,34 @@ class App extends Component {
 
       return bountyInstance.getVoters.call();
     })
-    .then((voters) => {
-      voters.forEach(voter => {
-        if (voter !== '0x0000000000000000000000000000000000000000') {
-          this.setState({
-            disabledBounties: [...this.state.disabledBounties, voter]
-          })
-        }
+      .then((voters) => {
+        voters.forEach(voter => {
+          if (voter !== '0x0000000000000000000000000000000000000000') {
+            this.setState({
+              disabledBounties: [...this.state.disabledBounties, voter]
+            })
+          }
+        })
       })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }
+
+  _handleContribute() {
+    web3.eth.getAccounts((error, accounts) => {
+      if (error) {
+        console.log(error);
+      }
+
+      debugger;
+
+      contracts.GitBounty.methods
+        .addToBounty()
+        .send({ from: accounts[1] })
+        .then(console.log)
+        .catch(console.error)
     })
-    .catch((err) => {
-      console.log(err.message);
-    });
   }
 
   _handleVoteBounty(ev) {
@@ -92,7 +109,7 @@ class App extends Component {
           return bountyInstance.vote('0x1231231')
         })
         .then(function (result) {
-          return Web3App.markVoted();
+          return this._markVoted()
         })
         .catch(function (err) {
           console.log(err.message);
@@ -116,20 +133,26 @@ class App extends Component {
     ];
 
     return (
-      <div style={{ height: '100%'}}>
-        <AppBar 
-          iconElementLeft={<i></i>} 
+      <div style={{ height: '100%' }}>
+        <AppBar
+          iconElementLeft={<i></i>}
           iconElementRight={
-            <img 
-              onClick={_ => this._handleDialogOpen()} 
-              src='https://cl.ly/1J350Z1H0K3d/plus.png' 
-              className="new-bounty-button" 
+            <img
+              onClick={_ => this._handleDialogOpen()}
+              src='https://cl.ly/1J350Z1H0K3d/plus.png'
+              className="new-bounty-button"
             />
-          } 
-          title="GitBounty" 
+          }
+          title="GitBounty"
         />
-        <section className="row col-xs-12 center-xs middle-xs" style={{ height: '100%', textAlign: 'center'}}>
-          <img src="https://cl.ly/2z1w1t2p1p06/hero-world.gif" style={{paddingTop: 100}} />
+        <section className="row col-xs-12 center-xs middle-xs" style={{ height: '100%', textAlign: 'center' }}>
+          <img src="https://cl.ly/2z1w1t2p1p06/hero-world.gif" style={{ paddingTop: 100 }} />
+          <FlatButton
+            label="Contribute"
+            type="button"
+            onClick={_ => this._handleContribute()}
+          />
+
           <Dialog
             title="New Bounty"
             modal={false}
