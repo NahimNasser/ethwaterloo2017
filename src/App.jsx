@@ -7,16 +7,11 @@ import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import TextField from 'material-ui/TextField'
 
+import { getWeb3 } from './utils'
 import bounties from '../bounties.json'
 import GitBountyJson from '../build/contracts/GitBounty.json'
 
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
-const web3 = new Web3(provider)
-const contracts = {}
-
-contracts.GitBounty = new web3.eth.Contract(GitBountyJson.abi, "0x03a912af59f51c88ba32e50c1fc45b3b3c3b4c77")
-// Set the provider for our contract
-contracts.GitBounty.setProvider(provider)
 
 class App extends Component {
   constructor(props) {
@@ -29,8 +24,29 @@ class App extends Component {
         voters: "",
         expiresIn: ""
       },
-      disabledBounties: []
+      disabledBounties: [],
+      web3: null,
+      contract: null
     }
+  }
+
+  componentWillMount() {
+    getWeb3
+      .then(results => {
+        this.setState({
+          web3: results.web3
+        })
+
+        // Instantiate contract once web3 provided.
+        this._instantiateContract()
+      })
+      .catch(() => {
+        console.log('Error finding web3.')
+      })
+  }
+
+  _instantiateContract() {
+    
   }
 
   _handleDialogClose() {
@@ -77,13 +93,19 @@ class App extends Component {
         console.log(error);
       }
 
-      debugger;
+      const gitBountyTruffleContract = TruffleContract(GitBountyJson)
+      gitBountyTruffleContract.setProvider(this.state.web3.currentProvider)
 
-      contracts.GitBounty.methods
-        .addToBounty()
-        .send({ from: accounts[1] })
-        .then(console.log)
-        .catch(console.error)
+      gitBountyTruffleContract.deployed()
+        .then((contractInstance) => {
+          debugger;
+
+          contractInstance
+            .addToBounty({from: accounts[0]})
+            .then(_ => {
+              debugger;
+            })
+        })
     })
   }
 
