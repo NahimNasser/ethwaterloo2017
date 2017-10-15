@@ -9,7 +9,7 @@ contract GitBountyCreator {
     }
     mapping (string => Bounty) private bounties;
     modifier isChild(string key) {
-        require(bounties[key].isHere);
+        require(bounties[key].addr == msg.sender);
         _;
     }
     function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable {
