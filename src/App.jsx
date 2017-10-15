@@ -24,11 +24,14 @@ class App extends Component {
       bounties: {},
       snackbarMessage: '',
       snackbarOpen: false,
-      dialogOpen: false,
-      dialogData: {
+      contributeDialogOpen: false,
+      contributeDialogData: {
         issueUrl: "",
         voters: "",
         expiresIn: ""
+      },
+      voteDialogOpen: false,
+      voteDialogData: {
       },
       disabledBounties: [],
       web3: null,
@@ -70,20 +73,30 @@ class App extends Component {
 
   _handleDialogClose() {
     this.setState({
-      dialogOpen: false
+      contributeDialogOpen: false
     })
   }
 
-  _handleDialogOpen() {
+  _handlecontributeDialogOpen() {
     this.setState({
-      dialogOpen: true
+      contributeDialogOpen: true
     })
   }
 
+  _handleVoteClose() {
+    this.setState({
+      voteDialogOpen: false
+    })
+  }
+
+  _handleVoteSubmit() {
+    this.setState({
+      voteDialogOpen: true
+    })
+  }
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
-        
         return instance
           .getAllBounties()
           .then(addresses => {
@@ -110,9 +123,9 @@ class App extends Component {
             }))
           })
           .then(results => {
-            this.setState({
-              issues: results
-            })
+            // this.setState({
+            //   issues: results
+            // })
           })
 
       })
@@ -120,7 +133,7 @@ class App extends Component {
   }
 
   _handleNewBounty() {
-    const data = this.state.dialogData
+    const data = this.state.contributeDialogData
 
     web3.eth.getAccounts((error, accounts) => {
       if (error) {
@@ -132,9 +145,9 @@ class App extends Component {
         .then((instance) => {
           instance
             .createBounty(
-              this.state.dialogData.issueUrl,
-              this.state.dialogData.voters.split(','),
-              parseInt(this.state.dialogData.expiresIn) * 60 * 60 * 24,
+              this.state.contributeDialogData.issueUrl,
+              this.state.contributeDialogData.voters.split(','),
+              parseInt(this.state.contributeDialogData.expiresIn) * 60 * 60 * 24,
               {
                 from: accounts[0]
               }
@@ -145,8 +158,8 @@ class App extends Component {
               this.setState({
                 snackbarOpen: true,
                 snackbarMessage: "New bounty created on contract",
-                dialogOpen: false,
-                dialogData: {
+                contributeDialogOpen: false,
+                contributeDialogData: {
                   issueUrl: "",
                   voters: "",
                   expiresIn: ""
@@ -241,6 +254,19 @@ class App extends Component {
         onClick={_ => this._handleNewBounty()}
       />,
     ];
+    const voteActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={_ => this._handleVoteClose()}
+      />,
+      <FlatButton
+        label="Submit"
+        primary={true}
+        keyboardFocused={true}
+        onClick={_ => this._handleVoteSubmit()}
+      />,
+    ];
 
     return (
       <div style={{ height: '100%' }}>
@@ -248,7 +274,7 @@ class App extends Component {
           iconElementLeft={<i></i>}
           iconElementRight={
             <img
-              onClick={_ => this._handleDialogOpen()}
+              onClick={_ => this._handlecontributeDialogOpen()}
               src='https://cl.ly/1J350Z1H0K3d/plus.png'
               className="new-bounty-button"
             />
@@ -271,7 +297,9 @@ class App extends Component {
                     style={{
                     }}
                     key={bounty.key}
-                    {...bounty}
+                    { ...bounty }
+                    bountyKey={bounty.key}
+                    onVoteClick={() => this.setState({ voteDialogOpen: true })}
                   />
                 )
               })
@@ -281,41 +309,56 @@ class App extends Component {
           <Dialog
             title="New Bounty"
             modal={false}
-            open={this.state.dialogOpen}
+            open={this.state.contributeDialogOpen}
             actions={actions}
-            className="row center-xs middle-xs"
           >
-            <div className="col-xs-10">
+            <div>
               <TextField
                 id="issue-url"
-                value={this.state.dialogData.issueUrl}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, issueUrl: ev.target.value } })}
+                value={this.state.contributeDialogData.issueUrl}
+                onChange={(ev) => this.setState({ contributeDialogData: { ...this.state.contributeDialogData, issueUrl: ev.target.value } })}
                 hintText="Issue URL"
                 fullWidth={true}
               />
             </div>
             <br />
-            <div className="col-xs-10">
+            <div>
               <TextField
                 id="voters"
-                value={this.state.dialogData.voters}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, voters: ev.target.value } })}
+                value={this.state.contributeDialogData.voters}
+                onChange={(ev) => this.setState({ contributeDialogData: { ...this.state.contributeDialogData, voters: ev.target.value } })}
                 hintText="Voters (comma-separated)"
                 fullWidth={true}
               />
             </div>
             <br />
-            <div className="col-xs-10 row">
+            <div>
               <TextField
                 id="expiry"
                 type="number"
-                value={this.state.dialogData.expiresIn}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, expiresIn: ev.target.value } })}
+                value={this.state.contributeDialogData.expiresIn}
+                onChange={(ev) => this.setState({ contributeDialogData: { ...this.state.contributeDialogData, expiresIn: ev.target.value } })}
                 hintText="Days until expiry"
                 fullWidth={true}
               />
             </div>
           </Dialog>
+          <Dialog
+            title="Vote"
+            modal={false}
+            open={this.state.voteDialogOpen}
+            actions={actions}
+          >
+            <div>
+              <TextField
+                id="issue-url"
+                onChange={(ev) => this.setState({ voteDialogData: { ...this.state.contributeDialogData } })}
+                hintText="Solution Wallet Address"
+                fullWidth={true}
+              />
+            </div>
+          </Dialog>
+
           <Snackbar
             open={this.state.snackbarOpen}
             message={this.state.snackbarMessage}

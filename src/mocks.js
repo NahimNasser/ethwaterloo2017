@@ -7,13 +7,11 @@ export const mockBounties = [
     owner: '0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae',
     totalBounty: 28.319223098,
     expiresAt: 1508013974364,
-    totalVotes: 1,
     PRS: [
       '0x8507c058799bd31c32b5b6598ff17bbc7553ab99',
       '0xb5293bbcedefd0d0d8b88c235703ec7ed8898167'
     ],
     totalPRS: 2,
-    requiredNumberOfVotes: 3,
     isBountyOpen: true,
     voterAddresses: [
       '0xce1a8f613d23cf3b4af4b236b05e6d4ed8d41d8be4c2c6593d5b1fa2ecb59185',
@@ -34,7 +32,6 @@ export const mockBounties = [
       '0xb5293bbcedefd0d0d8b88c235703ec7ed8898167'
     ],
     totalPRS: 2,
-    requiredNumberOfVotes: 3,
     isBountyOpen: true,
     voterAddresses: [
       '0xce1a8f613d23cf3b4af4b236b05e6d4ed8d41d8be4c2c6593d5b1fa2ecb59185',
@@ -49,13 +46,11 @@ export const mockBounties = [
     owner: '0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae',
     totalBounty: 28.319223098,
     expiresAt: 1508013974364,
-    totalVotes: 1,
     PRS: [
       '0x8507c058799bd31c32b5b6598ff17bbc7553ab99',
       '0xb5293bbcedefd0d0d8b88c235703ec7ed8898167'
     ],
     totalPRS: 2,
-    requiredNumberOfVotes: 3,
     isBountyOpen: true,
     voterAddresses: [
       '0xce1a8f613d23cf3b4af4b236b05e6d4ed8d41d8be4c2c6593d5b1fa2ecb59185',
@@ -70,13 +65,11 @@ export const mockBounties = [
     owner: '0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae',
     totalBounty: 28.319223098,
     expiresAt: 1508013974364,
-    totalVotes: 1,
     PRS: [
       '0x8507c058799bd31c32b5b6598ff17bbc7553ab99',
       '0xb5293bbcedefd0d0d8b88c235703ec7ed8898167'
     ],
     totalPRS: 2,
-    requiredNumberOfVotes: 3,
     isBountyOpen: true,
     voterAddresses: [
       '0xce1a8f613d23cf3b4af4b236b05e6d4ed8d41d8be4c2c6593d5b1fa2ecb59185',
@@ -91,13 +84,11 @@ export const mockBounties = [
     owner: '0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae',
     totalBounty: 28.319223098,
     expiresAt: 1508013974364,
-    totalVotes: 1,
     PRS: [
       '0x8507c058799bd31c32b5b6598ff17bbc7553ab99',
       '0xb5293bbcedefd0d0d8b88c235703ec7ed8898167'
     ],
     totalPRS: 2,
-    requiredNumberOfVotes: 3,
     isBountyOpen: true,
     voterAddresses: [
       '0xce1a8f613d23cf3b4af4b236b05e6d4ed8d41d8be4c2c6593d5b1fa2ecb59185',
