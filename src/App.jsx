@@ -187,17 +187,19 @@ class App extends Component {
       });
   }
 
-  _handleContribute(address) {
+  _handleContribute(contractAddress, amountInEther) {
     web3.eth.getAccounts((error, accounts) => {
       if (error) {
         console.error(error)
         return
       }
 
-      this.state.gitBountyContract.deployed({ at: address })
+      this.state.gitBountyContract.deployed({ at: contractAddress })
         .then((contractInstance) => {
           contractInstance
-            .addToBounty({from: accounts[0]})
+            .addToBounty({
+              from: accounts[0], value: web3.toWei(`${amountInEther}`, 'ether')
+            })
             .then(console.log)
         })
         .catch(console.error)
