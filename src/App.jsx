@@ -122,9 +122,9 @@ class App extends Component {
             }))
           })
           .then(results => {
-            // this.setState({
-            //   issues: results
-            // })
+            this.setState({
+              issues: results
+            })
           })
 
       })
