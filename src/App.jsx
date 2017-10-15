@@ -112,25 +112,27 @@ class App extends Component {
               this.setState({
                 bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
               });
-              return this.state.bounties[addr].methods
-                .getAllTheThings().call().then(data => ({ ...data, addr }))
+
+              return this.state.bounties[addr].methods.getAllTheThings().call().then(results => ({ data: results, address: addr }))
             })
 
             return Promise.all(promises)
           })
           .then(results => {
-            return results.map((elm, i) => ({
-              addr: elm.addr,
-              key: elm[0] == "" ? `issue-${i}` : elm[0],
-              owner: elm[1],
-              totalBounty: parseInt(elm[2]),
-              expiresAt: parseInt(elm[3]),
-              voterAddresses: elm[4],
-              totalVotes: parseInt(elm[5]),
-              solutionAddresses: elm[6],
-              totalSolutions: parseInt(elm[7]),
-              requiredNumberOfVotes: parseInt(elm[8]),
-              isBountyOpen: elm[9],
+            console.log(results);
+
+            return results.map(({data, address}, i) => ({
+              addr: address,
+              key: data[0] == "" ? `issue-${i}` : data[0],
+              owner: data[1],
+              totalBounty: parseInt(data[2]),
+              expiresAt: parseInt(data[3]),
+              voterAddresses: data[4],
+              totalVotes: parseInt(data[5]),
+              solutionAddresses: data[6],
+              totalSolutions: parseInt(data[7]),
+              requiredNumberOfVotes: parseInt(data[8]),
+              isBountyOpen: data[9],
             }))
           })
           .then(results => {
@@ -209,7 +211,8 @@ class App extends Component {
             .then(_ => {
               this.setState({
                 snackbarOpen: true,
-                snackbarMessage: "Thank you for your contribution!"
+                snackbarMessage: "Thank you for your contribution!",
+                voteDialogOpen: false
               })
             })
         .catch(console.error)
@@ -231,7 +234,8 @@ class App extends Component {
           if(isDone) {
             this.setState({
               snackbarOpen: true,
-              snackbarMessage: "Issue completed!"
+              snackbarMessage: "Issue completed!",
+              voteDialogOpen: false
             })
           }
 
@@ -258,11 +262,13 @@ class App extends Component {
     ];
     const voteActions = [
       <FlatButton
+        key={"action-1"}
         label="Cancel"
         primary={true}
         onClick={_ => this._handleVoteClose()}
       />,
       <FlatButton
+        key={"action-2"}
         label="Submit"
         primary={true}
         keyboardFocused={true}
