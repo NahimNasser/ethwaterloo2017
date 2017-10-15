@@ -259,11 +259,13 @@ class App extends Component {
     ];
     const voteActions = [
       <FlatButton
+        key={"action-1"}
         label="Cancel"
         primary={true}
         onClick={_ => this._handleVoteClose()}
       />,
       <FlatButton
+        key={"action-2"}
         label="Submit"
         primary={true}
         keyboardFocused={true}
