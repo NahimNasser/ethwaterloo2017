@@ -8,6 +8,7 @@ contract GitBountyCreator {
         uint256 payoutAmount;
     }
     mapping (string => Bounty) private bounties;
+    address[] bountiesAddressesArray;
     modifier isChild(string key) {
         require(bounties[key].addr == msg.sender);
         _;
@@ -21,6 +22,7 @@ contract GitBountyCreator {
             payoutAmount: 0
         });
         b.addToBounty.value(msg.value)();
+        bountiesAddressesArray.push(b);
         return b;
     }
     function getBounty(string key) public constant returns (address, uint256, uint256, uint256) {
@@ -35,6 +37,9 @@ contract GitBountyCreator {
       Bounty storage b = bounties[key];
       b.totalVotes = newTotalVotes;
       bounties[key] = b;
+    }
+    function getAllBounties() public constant returns (address[]) {
+      return bountiesAddressesArray;
     }
 }
 
@@ -111,6 +116,9 @@ contract GitBounty {
     }
     function hasVoted(address voter, address hunter) private constant returns (bool) {
         return hasVotedToAddress[keccak256(voter, hunter)];
+    }
+    function getAllPRS() public constant returns (address[]) {
+      return PRS;
     }
 
 }
