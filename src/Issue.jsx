@@ -45,6 +45,7 @@ export default class Issue extends React.Component {
             label='Contribute'
             disabled={!this.props.isBountyOpen}
             primary
+            onClick={() => this.props.onContributeClick()}
           />
           <RaisedButton
             label='Vote'
