@@ -80,11 +80,40 @@ class App extends Component {
   }
 
   _loadBounties() {
-    this.state.gitBountyContract.deployed()
+    this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
-        this.setState({
-          bounties: instance.bounties
-        })
+        
+        return instance
+          .getAllBounties()
+          .then(addresses => {
+            const promises = addresses.map((addr) => {
+              return this.state.gitBountyContract.deployed({ at: addr }).then(inst => {
+                return inst.getAllTheThings()
+              })
+            })
+
+            return Promise.all(promises)
+          })
+          .then(results => {
+            return results.map(elm => ({
+              key: elm[0], 
+              owner: elm[1], 
+              totalBounty: elm[2].toNumber(), 
+              expiresAt: elm[3].toNumber(), 
+              voterAddresses: elm[4], 
+              totalVotes: elm[5].toNumber(), 
+              solutionAddresses: elm[6], 
+              totalSolutions: elm[7].toNumber(), 
+              requiredNumberOfVotes: elm[8].toNumber(), 
+              isBountyOpen: elm[8].toNumber() > 0
+            }))
+          })
+          .then(results => {
+            this.setState({
+              issues: results
+            })
+          })
+
       })
       .catch(console.error)
   }
@@ -175,35 +204,27 @@ class App extends Component {
     })
   }
 
-  // _handleVoteBounty(ev) {
-  //   ev.preventDefault()
+  _handleVoteBounty(issue) {
+    // Required arguments: Github Issue URL, Voter Addresses, expiresIn, 0.1eth
+    web3.eth.getAccounts((error, accounts) => {
+      if (error) {
+        console.log(error);
+      }
 
-  //   var petId = parseInt($(event.target).data('id'))
-  //   var bountyInstance
+      var account = accounts[0]
 
-  //   // Required arguments: Github Issue URL, Voter Addresses, expiresIn, 0.1eth
-  //   web3.eth.getAccounts((error, accounts) => {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-
-  //     var account = accounts[0]
-
-  //     contracts.GitBounty.deployed()
-  //       .then(function (instance) {
-  //         bountyInstance = instance
-
-  //         // Execute adopt as a transaction by sending account
-  //         return bountyInstance.vote('0x1231231')
-  //       })
-  //       .then(function (result) {
-  //         return this._markVoted()
-  //       })
-  //       .catch(function (err) {
-  //         console.log(err.message);
-  //       })
-  //   })
-  // }
+      contracts.GitBounty.deployed({ at: address })
+        .then((instance) => {
+          return instance.vote(issue)
+        })
+        .then(function (result) {
+          return this._markVoted()
+        })
+        .catch(function (err) {
+          console.log(err.message);
+        })
+    })
+  }
 
   render() {
     const actions = [
@@ -243,19 +264,12 @@ class App extends Component {
 
           <div>
             {
-              Object.keys(this.state.bounties).map((key) => {
-                const bounty = this.state.bounties[key]
+              Object.keys(this.state.issues).map((key) => {
+                const bounty = this.state.issues[key]
 
                 return (
                   <Bounty
-                    bountyKey={key}
-                    bountyAddress={bounty.addr}
-                    ownerAddress={bounty.owner}
-                    currentNumberOfVotes={bounty.voteProgress}
-                    totalAmount={bounty.payoutAmount}
-                    expiryDate={new Date()}
-                    voterAddresses={[]}
-                    isBountyOpen={true}
+                    issue={bounty}
                   />
                 )
               })
