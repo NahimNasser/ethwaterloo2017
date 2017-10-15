@@ -12,11 +12,7 @@ contract GitBountyCreator {
         require(bounties[key].addr == msg.sender);
         _;
     }
-<<<<<<< HEAD
     function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable returns(address) {
-=======
-    function createBounty(string issueUrl, address[] voters, uint256  expiresIn) public payable {
->>>>>>> 90ede862a0311b2771f38a8494a66a7b7edcd217
         GitBounty b = new GitBounty(issueUrl, voters, expiresIn, this);
         bounties[issueUrl] = Bounty({
             addr: b,
