@@ -38,7 +38,7 @@ export default class Issue extends React.Component {
         avatar={this.props.isBountyOpen ? openBountyIcon : closedBountyIcon}
       />
         <CardText expandable={false} style={{width: '100%'}}>
-          Github Issue URL: <a href={this.props.bountyKey}>{this.props.bountyKey}</a>
+          Github Issue URL: <a href={this.props.bountyKey} target='blank'>{this.props.bountyKey}</a>
           <br />
           Github Issue Address: {this.props.addr}
         </CardText>
