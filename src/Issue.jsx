@@ -26,7 +26,6 @@ export default class Issue extends React.Component {
     const closedBountyIcon = "https://cdn0.iconfinder.com/data/icons/flat-security-icons/512/lock.png"
     const openBountyCopy = "Open Bounty"
     const closedBountyCopy = "Bounty Ended"
-    console.log(this.props.totalBounty)
     return (
       <Card
         className='col-xs-12 bountyCard'
