@@ -63,6 +63,8 @@ class App extends Component {
       gitBountyContract: gitBountyTruffleContract,
       gitBountyCreatorContract: gitBountyCreatorTruffleContract
     })
+
+    this._loadBounties()
   }
 
   _handleDialogClose() {
@@ -90,37 +92,47 @@ class App extends Component {
   _handleNewBounty() {
     const data = this.state.dialogData
 
-    this.state.gitBountyCreatorContract.deployed()
-      .then((gitBountyInstance) => {
-        gitBountyInstance
-          .createBounty(
-            this.state.dialogData.issueUrl,
-            this.state.dialogData.voters.split(','), 
-            parseInt(this.state.dialogData.expiresIn) * 60 * 60 * 24
-          )
-          .then(resp => {
-            console.log(resp)
+    web3.eth.getAccounts((error, accounts) => {
+      if (error) {
+        console.error(error)
+        return
+      }
 
-            this.setState({
-              snackbarOpen: true,
-              snackbarMessage: "New bounty created on contract",
-              dialogOpen: false,
-              dialogData: {
-                issueUrl: "",
-                voters: "",
-                expiresIn: ""
+      this.state.gitBountyCreatorContract.deployed()
+        .then((instance) => {
+          instance
+            .createBounty(
+              this.state.dialogData.issueUrl,
+              this.state.dialogData.voters.split(','),
+              parseInt(this.state.dialogData.expiresIn) * 60 * 60 * 24,
+              {
+                from: accounts[0]
               }
-            })
+            )
+            .then(resp => {
+              console.log(resp)
 
-            return null
-          })
-          .catch((err) => {
-            console.error(err)
-            
-            return new Error("Failed to create new bounty")
-          })
-      })
-      .catch(console.error)
+              this.setState({
+                snackbarOpen: true,
+                snackbarMessage: "New bounty created on contract",
+                dialogOpen: false,
+                dialogData: {
+                  issueUrl: "",
+                  voters: "",
+                  expiresIn: ""
+                }
+              })
+
+              return null
+            })
+            .catch((err) => {
+              console.error(err)
+
+              return new Error("Failed to create new bounty")
+            })
+        })
+        .catch(console.error)
+    })
   }
 
   _markVoted() {
@@ -163,35 +175,35 @@ class App extends Component {
     })
   }
 
-  _handleVoteBounty(ev) {
-    ev.preventDefault()
+  // _handleVoteBounty(ev) {
+  //   ev.preventDefault()
 
-    var petId = parseInt($(event.target).data('id'))
-    var bountyInstance
+  //   var petId = parseInt($(event.target).data('id'))
+  //   var bountyInstance
 
-    // Required arguments: Github Issue URL, Voter Addresses, expiresIn, 0.1eth
-    web3.eth.getAccounts((error, accounts) => {
-      if (error) {
-        console.log(error);
-      }
+  //   // Required arguments: Github Issue URL, Voter Addresses, expiresIn, 0.1eth
+  //   web3.eth.getAccounts((error, accounts) => {
+  //     if (error) {
+  //       console.log(error);
+  //     }
 
-      var account = accounts[0]
+  //     var account = accounts[0]
 
-      contracts.GitBounty.deployed()
-        .then(function (instance) {
-          bountyInstance = instance
+  //     contracts.GitBounty.deployed()
+  //       .then(function (instance) {
+  //         bountyInstance = instance
 
-          // Execute adopt as a transaction by sending account
-          return bountyInstance.vote('0x1231231')
-        })
-        .then(function (result) {
-          return this._markVoted()
-        })
-        .catch(function (err) {
-          console.log(err.message);
-        })
-    })
-  }
+  //         // Execute adopt as a transaction by sending account
+  //         return bountyInstance.vote('0x1231231')
+  //       })
+  //       .then(function (result) {
+  //         return this._markVoted()
+  //       })
+  //       .catch(function (err) {
+  //         console.log(err.message);
+  //       })
+  //   })
+  // }
 
   render() {
     const actions = [
