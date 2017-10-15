@@ -295,7 +295,7 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
+                  <div className='col-md-4 col-xs-12' style={{height: '350px'}}>
                     <Issue
                       style={{}}
                       key={bounty.addr}
