@@ -7,7 +7,7 @@ import * as colors from 'material-ui/styles/colors'
 
 export default class Issue extends React.Component {
   static propTypes = {
-    id: PropTypes.string.isRequired,
+    bountyKey: PropTypes.string.isRequired,
     owner: PropTypes.string.isRequired,
     totalSolutions: PropTypes.number.isRequired,
     totalBounty: PropTypes.number.isRequired,
@@ -19,37 +19,36 @@ export default class Issue extends React.Component {
 
   render() {
     const numContributors = this.props.voterAddresses.length
-    const currentVotePercantage = Math.round(this.props.totalSolutions / numContributors * 100)
     return (
       <Card
         className='col-xs-12'
         style={this.props.style}
       >
-        <CardHeader
-          title={`${this.props.totalBounty.toFixed(2)} ETH`}
-          subtitle={<a href={this.props.id}>{this.props.id}</a>}
-          actAsExpander={false}
-          showExpandableButton={false}
-        />
         <CardText expandable={false} style={{ width: '100%' }}>
+          <div style={{
+            fontSize: '300%',
+            color: this.props.isBountyOpen ? colors.green500 : colors.red500,
+          }}>
+            {`${this.props.totalBounty.toFixed(3)} ETH`}
+          </div>
+          <div style={{
+          }}>
+            <a href={this.props.bountyKey}>{this.props.bountyKey}</a>
+          </div>
           <div>{this.bountyOpenComponent()}</div>
           <div>{new Date(this.props.expiresAt).toDateString()}</div>
-          <div>
-            There are {numContributors} contributors.
-          </div>
-          <div>
-            Received {currentVotePercantage}% of votes (51% required).
-          </div>
-          <progress
-            value={currentVotePercantage}
-            max={51}
-          />
         </CardText>
         <CardActions>
           <RaisedButton
             label='Contribute'
             disabled={!this.props.isBountyOpen}
             primary
+          />
+          <RaisedButton
+            label='Vote'
+            disabled={false}
+            primary
+            onClick={() => this.props.onVoteClick()}
           />
         </CardActions>
       </Card>
