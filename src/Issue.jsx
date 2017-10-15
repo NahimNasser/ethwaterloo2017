@@ -9,7 +9,6 @@ export default class Issue extends React.Component {
   static propTypes = {
     bountyKey: PropTypes.string.isRequired,
     owner: PropTypes.string.isRequired,
-    totalSolutions: PropTypes.number.isRequired,
     totalBounty: PropTypes.number.isRequired,
     expiresAt: PropTypes.number.isRequired,
     voterAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,
