@@ -120,7 +120,7 @@ class App extends Component {
               solutionAddresses: elm[6],
               totalSolutions: parseInt(elm[7]),
               requiredNumberOfVotes: parseInt(elm[8]),
-              isBountyOpen: elm[8],
+              isBountyOpen: elm[9],
             }))
           })
           .then(results => {
