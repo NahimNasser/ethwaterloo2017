@@ -96,23 +96,21 @@ class App extends Component {
   }
 
   _loadBounties() {
-    let address
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-              address = addr
               return this.state.gitBountyContract.deployed({ at: addr }).then(inst => {
-                return inst.getAllTheThings()
+                return inst.getAllTheThings().then(data => ({ data: data, address: addr }))
               })
             })
 
             return Promise.all(promises)
           })
           .then(results => {
-            return results.map((elm, i) => ({
+            return results.map(({data, address}, i) => ({
               addr: address,
               key: elm[0],
               owner: elm[1], 
@@ -127,11 +125,13 @@ class App extends Component {
             }))
           })
           .then(results => {
+            console.log(results)
+
             this.setState({
               issues: results
             })
           })
-        .catch(console.error)
+          .catch(console.error)
 
       })
       .catch(console.error)
@@ -272,6 +272,8 @@ class App extends Component {
       />,
     ];
 
+    console.log(this.issues)
+
     return (
       <div style={{ height: '100%', width: '100%' }}>
         <AppBar
@@ -283,7 +285,7 @@ class App extends Component {
               className="new-bounty-button"
             />
           }
-          title="GitBounty"
+          title="DOG - The Open Source Bounty Hunter"
         />
         <section 
           className={`row col-xs-12 ${this.state.issues.length > 0 ? '' : 'center-xs middle-xs'}`} 
@@ -299,10 +301,9 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div className='col-md-4 col-xs-12' style={{height: '200px'}}>
+                  <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
                     <Issue
-                      style={{
-                      }}
+                      style={{}}
                       key={bounty.addr}
                       { ...bounty }
                       bountyKey={bounty.key}
@@ -310,10 +311,18 @@ class App extends Component {
                         this._handleContribute()
                       }}
                       onVoteClick={() => {
+<<<<<<< HEAD
                         this.setState({
                           voteDialogOpen: true,
                           currentIssueAddress: bounty.addr,
                         })}
+=======
+                          this.setState({
+                            votecontributeDialogOpen: true,
+                            currentIssueAddress: bounty.addr,
+                          })
+                        }
+>>>>>>> 3c3fd5da4bf25b0e98c0cba09db1391a2723458b
                       }
                     />
                     </div>
@@ -329,6 +338,7 @@ class App extends Component {
           onRequestClose={_ => this.setState({ snackbarOpen: false, snackbarMessage: '' })}
         />
         <Dialog
+          key="new-bounty-dialog"
           title="New Bounty"
           modal={false}
           open={this.state.newDialogOpen}
@@ -366,6 +376,7 @@ class App extends Component {
           </div>
         </Dialog>
         <Dialog
+          key="vote-dialog"
           title="Vote"
           modal={false}
           open={this.state.voteDialogOpen}
