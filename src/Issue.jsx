@@ -9,6 +9,7 @@ export default class Issue extends React.Component {
   static propTypes = {
     bountyKey: PropTypes.string.isRequired,
     owner: PropTypes.string.isRequired,
+    totalSolutions: PropTypes.number.isRequired,
     totalBounty: PropTypes.number.isRequired,
     expiresAt: PropTypes.number.isRequired,
     voterAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -18,10 +19,9 @@ export default class Issue extends React.Component {
 
   render() {
     const numContributors = this.props.voterAddresses.length
-    const currentVotePercantage = Math.round(this.props.totalVotes / numContributors * 100)
     return (
       <Card
-        className='col-md-6'
+        className='col-xs-12'
         style={this.props.style}
       >
         <CardText expandable={false} style={{ width: '100%' }}>
