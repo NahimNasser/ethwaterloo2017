@@ -112,16 +112,16 @@ class App extends Component {
           .then(results => {
             return results.map(({data, address}, i) => ({
               addr: address,
-              key: elm[0],
-              owner: elm[1], 
-              totalBounty: elm[2].toNumber(), 
-              expiresAt: elm[3].toNumber(), 
-              voterAddresses: elm[4], 
-              totalVotes: elm[5].toNumber(), 
-              solutionAddresses: elm[6], 
-              totalSolutions: elm[7].toNumber(), 
-              requiredNumberOfVotes: elm[8].toNumber(), 
-              isBountyOpen: elm[8].toNumber() > 0,
+              key: data[0],
+              owner: data[1], 
+              totalBounty: data[2].toNumber(), 
+              expiresAt: data[3].toNumber(), 
+              voterAddresses: data[4], 
+              totalVotes: data[5].toNumber(), 
+              solutionAddresses: data[6], 
+              totalSolutions: data[7].toNumber(), 
+              requiredNumberOfVotes: data[8].toNumber(), 
+              isBountyOpen: data[8].toNumber() > 0,
             }))
           })
           .then(results => {
@@ -308,22 +308,14 @@ class App extends Component {
                       { ...bounty }
                       bountyKey={bounty.key}
                       onContributeClick={() => {
-                        this._handleContribute()
+                        this._handleContribute(bounty.addr)
                       }}
                       onVoteClick={() => {
-<<<<<<< HEAD
                         this.setState({
                           voteDialogOpen: true,
                           currentIssueAddress: bounty.addr,
-                        })}
-=======
-                          this.setState({
-                            votecontributeDialogOpen: true,
-                            currentIssueAddress: bounty.addr,
-                          })
-                        }
->>>>>>> 3c3fd5da4bf25b0e98c0cba09db1391a2723458b
-                      }
+                        })
+                      }}
                     />
                     </div>
                   )
