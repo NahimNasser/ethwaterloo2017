@@ -32,7 +32,7 @@ export default class Issue extends React.Component {
         style={this.props.style}
       >
       <CardHeader
-        title={`${this.props.totalBounty.toFixed(3)} ETH`}
+        title={`${(this.props.totalBounty/18).toFixed(3)} ETH`}
         titleStyle={{fontSize: '200%'}}
         subtitle={this.props.isBountyOpen ? openBountyCopy : closedBountyCopy}
         avatar={this.props.isBountyOpen ? openBountyIcon : closedBountyIcon}
