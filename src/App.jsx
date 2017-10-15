@@ -225,7 +225,7 @@ class App extends Component {
 
       var account = accounts[0]
 
-      this.state.bounties[this.state.currentIssueAddress].methods.vote(issue, { from: account })
+      this.state.bounties[this.state.currentIssueAddress].methods.vote(issue).send( { from: account })
         .then((isDone) => {
           if(isDone) {
             this.setState({
