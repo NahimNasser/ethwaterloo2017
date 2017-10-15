@@ -39,12 +39,15 @@ export default class Issue extends React.Component {
       />
         <CardText expandable={false} style={{width: '100%'}}>
           Github Issue URL: <a href={this.props.bountyKey}>{this.props.bountyKey}</a>
+          <br />
+          Github Issue Address: {this.props.addr}
         </CardText>
         <CardActions>
           <RaisedButton
             label='Contribute'
             disabled={!this.props.isBountyOpen}
             primary
+            onClick={() => this.props.onContributeClick()}
           />
           <RaisedButton
             label='Vote'
