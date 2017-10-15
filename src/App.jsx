@@ -6,14 +6,18 @@ import React, { Component } from 'react'
 import AppBar from 'material-ui/AppBar'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
+import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import Snackbar from 'material-ui/Snackbar'
+import ContentAddBox from 'material-ui/svg-icons/content/add-box';
+
 import Issue from './Issue.jsx'
 
 import { getWeb3 } from './utils'
 import bounties from '../bounties.json'
 import GitBountyJson from '../build/contracts/GitBounty.json'
 import GitBountyCreatorJson from '../build/contracts/GitBountyCreator.json'
+import {fullWhite} from 'material-ui/styles/colors';
 
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 
@@ -280,13 +284,8 @@ class App extends Component {
       <div style={{ height: '100%', width: '100%' }}>
         <AppBar
           iconElementLeft={<i></i>}
-          iconElementRight={
-            <img
-              onClick={_ => this._handlenewDialogOpen()}
-              src='https://cl.ly/1J350Z1H0K3d/plus.png'
-              className="new-bounty-button"
-            />
-          }
+          iconElementRight={<RaisedButton style={{marginTop: "6px", marginRight: "5px"}} icon={<ContentAddBox />}
+ backgroundColor={fullWhite} onClick={_ => this._handlenewDialogOpen()} label="Create Bounty" />}
           title="DOG - The Open Source Bounty Hunter"
         />
         <section
