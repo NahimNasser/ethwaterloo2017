@@ -36,7 +36,8 @@ class App extends Component {
       web3: null,
       gitBountyContract: null,
       gitBountyCreatorContract: null,
-      issues: []
+      solutionWalletAddress: '',
+      issues: [],
     }
   }
 
@@ -95,12 +96,14 @@ class App extends Component {
   }
 
   _loadBounties() {
+    let address
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
+              address = addr
               return this.state.gitBountyContract.deployed({ at: addr }).then(inst => {
                 return inst.getAllTheThings()
               })
@@ -110,6 +113,7 @@ class App extends Component {
           })
           .then(results => {
             return results.map((elm, i) => ({
+              addr: address,
               key: elm[0] == "" ? `issue-${i}` : elm[0],
               owner: elm[1], 
               totalBounty: elm[2].toNumber(), 
@@ -119,7 +123,7 @@ class App extends Component {
               solutionAddresses: elm[6], 
               totalSolutions: elm[7].toNumber(), 
               requiredNumberOfVotes: elm[8].toNumber(), 
-              isBountyOpen: elm[8].toNumber() > 0
+              isBountyOpen: elm[8].toNumber() > 0,
             }))
           })
           .then(results => {
@@ -127,6 +131,7 @@ class App extends Component {
               issues: results
             })
           })
+        .catch(console.error)
 
       })
       .catch(console.error)
@@ -153,8 +158,6 @@ class App extends Component {
               }
             )
             .then(resp => {
-              console.log(resp)
-
               this.setState({
                 snackbarOpen: true,
                 snackbarMessage: "New bounty created on contract",
@@ -211,7 +214,8 @@ class App extends Component {
     })
   }
 
-  _handleVoteBounty(issue) {
+  _handleVoteBounty() {
+    const issue = this.state.solutionWalletAddress
     // Required arguments: Github Issue URL, Voter Addresses, expiresIn, 0.1eth
     web3.eth.getAccounts((error, accounts) => {
       if (error) {
@@ -220,9 +224,9 @@ class App extends Component {
 
       var account = accounts[0]
 
-      contracts.GitBounty.deployed({ at: address })
+      this.state.gitBountyContract.deployed({ at: this.state.currentIssueAddress })
         .then((instance) => {
-          return instance.vote(issue)
+          return instance.vote(issue, { from: account })
         })
         .then((isDone) => {
           if(isDone) {
@@ -263,7 +267,7 @@ class App extends Component {
         label="Submit"
         primary={true}
         keyboardFocused={true}
-        onClick={_ => this._handleVoteSubmit()}
+        onClick={_ => this._handleVoteBounty()}
       />,
     ];
 
@@ -292,20 +296,26 @@ class App extends Component {
           }
           <div className='row col-xs-12'>
             {
-              this.state.issues.map((bounty, i) => {
+              this.state.issues.map((bounty) => {
                 return (
                   <div className='col-md-4 col-xs-12' style={{height: '200px'}}>
                     <Issue
-                      style={{}}
-                      key={i}
+                      style={{
+                      }}
+                      key={bounty.addr}
                       { ...bounty }
                       bountyKey={bounty.key}
-                      onVoteClick={() => this.setState({ votecontributeDialogOpen: true })}
+                      onVoteClick={() => {
+                        this.setState({
+                          votecontributeDialogOpen: true,
+                          currentIssueAddress: bounty.addr,
+                        })}
+                      }
                     />
-                  </div>
-                )
-              })
-            }
+                    </div>
+                  )
+                })
+              }
           </div>
         </section>
         <Snackbar
@@ -352,20 +362,20 @@ class App extends Component {
           </div>
         </Dialog>
         <Dialog
-            title="Vote"
-            modal={false}
-            open={this.state.votecontributeDialogOpen}
-            actions={actions}
-          >
-            <div>
-              <TextField
-                id="issue-url"
-                onChange={(ev) => this.setState({ votecontributeDialogData: { ...this.state.contributeDialogData } })}
-                hintText="Solution Wallet Address"
-                fullWidth={true}
-              />
-            </div>
-          </Dialog>
+          title="Vote"
+          modal={false}
+          open={this.state.votecontributeDialogOpen}
+          actions={voteActions}
+        >
+          <div>
+            <TextField
+              id="issue-url"
+              onChange={(ev) => this.setState({ solutionWalletAddress: ev.target.value })}
+              hintText="Solution Wallet Address"
+              fullWidth={true}
+            />
+          </div>
+        </Dialog>
       </div>
     );
   }
