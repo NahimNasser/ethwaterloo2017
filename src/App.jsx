@@ -34,7 +34,7 @@ class App extends Component {
       web3: null,
       gitBountyContract: null,
       gitBountyCreatorContract: null,
-      issues: require('./mocks.js').mockBounties,
+      issues: [],
     }
   }
 
@@ -96,8 +96,8 @@ class App extends Component {
             return Promise.all(promises)
           })
           .then(results => {
-            return results.map(elm => ({
-              key: elm[0], 
+            return results.map((elm, i) => ({
+              key: elm[0] == "" ? `issue-${i}` : elm[0],
               owner: elm[1], 
               totalBounty: elm[2].toNumber(), 
               expiresAt: elm[3].toNumber(), 
@@ -165,34 +165,11 @@ class App extends Component {
     })
   }
 
-  _markVoted() {
-    let bountyInstance
-
-    this.contract.deployed()
-      .then((instance) => {
-        bountyInstance = instance
-
-        return bountyInstance.getVoters.call()
-      })
-      .then((voters) => {
-        voters.forEach(voter => {
-          if (voter !== '0x0000000000000000000000000000000000000000') {
-            this.setState({
-              disabledBounties: [...this.state.disabledBounties, voter]
-            })
-          }
-        })
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  }
-
   _handleContribute(contractAddress, amountInEther) {
     web3.eth.getAccounts((error, accounts) => {
       if (error) {
         console.error(error)
-        return
+        return null
       }
 
       this.state.gitBountyContract.deployed({ at: contractAddress })
@@ -201,7 +178,14 @@ class App extends Component {
             .addToBounty({
               from: accounts[0], value: web3.toWei(`${amountInEther}`, 'ether')
             })
-            .then(console.log)
+            .then(_ => {
+              this.setState({
+                snackbarOpen: true,
+                snackbarMessage: "Thank you for your contribution!"
+              })
+
+              return null
+            })
         })
         .catch(console.error)
     })
@@ -220,12 +204,18 @@ class App extends Component {
         .then((instance) => {
           return instance.vote(issue)
         })
-        .then(function (result) {
-          return this._markVoted()
+        .then((isDone) => {
+          if(isDone) {
+            this.setState({
+              snackbarOpen: true,
+              snackbarMessage: "Issue completed!"
+            })
+          }
+
+          // reload the bounties
+          return this._loadBounties()
         })
-        .catch(function (err) {
-          console.log(err.message);
-        })
+        .catch(console.error)
     })
   }
 
@@ -245,7 +235,7 @@ class App extends Component {
     ];
 
     return (
-      <div style={{ height: '100%' }}>
+      <div style={{ height: '100%', width: '100%' }}>
         <AppBar
           iconElementLeft={<i></i>}
           iconElementRight={
@@ -257,74 +247,75 @@ class App extends Component {
           }
           title="GitBounty"
         />
-        <section className="row col-xs-12 center-xs middle-xs" style={{ height: '100%', textAlign: 'center' }}>
-          <img src="https://cl.ly/2z1w1t2p1p06/hero-world.gif" style={{ paddingTop: 100 }} />
-          <FlatButton
-            label="Contribute"
-            type="button"
-            onClick={_ => this._handleContribute()}
-          />
-
-          <div className='row'>
-            {
-              this.state.issues.map((bounty) => {
-                return (
-                  <Issue
-                    style={{
-                    }}
-                    key={bounty.key}
-                    {...bounty}
-                  />
-                )
-              })
-            }
+        <section 
+          className={`row col-xs-12 ${this.state.issues.length > 0 ? '' : 'center-xs middle-xs'}`} 
+          style={{ height: '100%', textAlign: 'center', padding: '25px' }}
+        >
+          {
+            this.state.issues.length == 0 && 
+              (
+                <img src="https://cl.ly/2z1w1t2p1p06/hero-world.gif" style={{ paddingTop: 100 }} />
+              )
+          }
+          <div className='row col-xs-12'>
+            <div className='col-md-4 col-xs-12'>
+              {
+                this.state.issues.map((bounty, i) => {
+                  return (
+                    <Issue
+                      style={{}}
+                      {...bounty}
+                      id={bounty.key}
+                    />
+                  )
+                })
+              }
+            </div>
           </div>
-
-          <Dialog
-            title="New Bounty"
-            modal={false}
-            open={this.state.dialogOpen}
-            actions={actions}
-            className="row center-xs middle-xs"
-          >
-            <div className="col-xs-10">
-              <TextField
-                id="issue-url"
-                value={this.state.dialogData.issueUrl}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, issueUrl: ev.target.value } })}
-                hintText="Issue URL"
-                fullWidth={true}
-              />
-            </div>
-            <br />
-            <div className="col-xs-10">
-              <TextField
-                id="voters"
-                value={this.state.dialogData.voters}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, voters: ev.target.value } })}
-                hintText="Voters (comma-separated)"
-                fullWidth={true}
-              />
-            </div>
-            <br />
-            <div className="col-xs-10 row">
-              <TextField
-                id="expiry"
-                type="number"
-                value={this.state.dialogData.expiresIn}
-                onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, expiresIn: ev.target.value } })}
-                hintText="Days until expiry"
-                fullWidth={true}
-              />
-            </div>
-          </Dialog>
-          <Snackbar
-            open={this.state.snackbarOpen}
-            message={this.state.snackbarMessage}
-            autoHideDuration={4000}
-            onRequestClose={_ => this.setState({ snackbarOpen: false, snackbarMessage: '' })}
-          />
         </section>
+        <Snackbar
+          open={this.state.snackbarOpen}
+          message={this.state.snackbarMessage}
+          autoHideDuration={4000}
+          onRequestClose={_ => this.setState({ snackbarOpen: false, snackbarMessage: '' })}
+        />
+        <Dialog
+          title="New Bounty"
+          modal={false}
+          open={this.state.dialogOpen}
+          actions={actions}
+        >
+          <div className="col-xs-10">
+            <TextField
+              id="issue-url"
+              value={this.state.dialogData.issueUrl}
+              onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, issueUrl: ev.target.value } })}
+              hintText="Issue URL"
+              fullWidth={true}
+            />
+          </div>
+          <br />
+          <div className="col-xs-10">
+            <TextField
+              id="voters"
+              value={this.state.dialogData.voters}
+              onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, voters: ev.target.value } })}
+              hintText="Voters (comma-separated)"
+              fullWidth={true}
+            />
+          </div>
+          <br />
+          <div className="col-xs-10 row">
+            <TextField
+              id="expiry"
+              type="number"
+              value={this.state.dialogData.expiresIn}
+              onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, expiresIn: ev.target.value } })}
+              hintText="Days until expiry"
+              fullWidth={true}
+            />
+          </div>
+        </Dialog>
       </div>
     );
   }

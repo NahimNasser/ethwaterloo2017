@@ -7,9 +7,9 @@ import * as colors from 'material-ui/styles/colors'
 
 export default class Issue extends React.Component {
   static propTypes = {
-    key: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     owner: PropTypes.string.isRequired,
-    currentNumberOfVotes: PropTypes.number.isRequired,
+    totalSolutions: PropTypes.number.isRequired,
     totalBounty: PropTypes.number.isRequired,
     expiresAt: PropTypes.number.isRequired,
     voterAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -19,15 +19,15 @@ export default class Issue extends React.Component {
 
   render() {
     const numContributors = this.props.voterAddresses.length
-    const currentVotePercantage = Math.round(this.props.currentNumberOfVotes / numContributors * 100)
+    const currentVotePercantage = Math.round(this.props.totalSolutions / numContributors * 100)
     return (
       <Card
-        className='col-md-6'
+        className='col-xs-12'
         style={this.props.style}
       >
         <CardHeader
           title={`${this.props.totalBounty.toFixed(2)} ETH`}
-          subtitle={<a href={this.props.key}>{this.props.key}</a>}
+          subtitle={<a href={this.props.id}>{this.props.id}</a>}
           actAsExpander={false}
           showExpandableButton={false}
         />
