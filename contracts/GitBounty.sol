@@ -15,19 +15,26 @@ contract GitBountyCreator {
 
 contract GitBounty {
     GitBountyCreator public parent;
+
+    // Returned in getAllTheThings in that order
     string public key;
     address public owner;
     uint256 public totalBounty;
     uint256 public expiresAt;
     address[] public voterAddresses;
     uint256 public totalVotes;
-    mapping (address => uint256) public contributions;
-    mapping (address => bool) public eligibleVotersAddresses;
-    mapping (address => uint256) public votes;
     address[] public PRS;
     uint256 public totalPRS;
     uint256 public requiredNumberOfVotes;
     bool public isBountyOpen;
+
+    function getAllTheThings() public constant returns(string, address, uint256, uint256, address[], uint256, address[], uint256, uint256, bool ) {
+      return (key, owner, totalBounty, expiresAt, voterAddresses, totalVotes, PRS, totalPRS, requiredNumberOfVotes, isBountyOpen);
+    }
+
+    mapping (address => uint256) public contributions;
+    mapping (address => bool) public eligibleVotersAddresses;
+    mapping (address => uint256) public votes;
     mapping (bytes32 => bool) private hasVotedToAddress;
 
     modifier onlyOwner {
@@ -89,5 +96,6 @@ contract GitBounty {
     function getAllPRS() public constant returns (address[]) {
       return PRS;
     }
+
 
 }
