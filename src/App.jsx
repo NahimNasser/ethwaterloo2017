@@ -344,7 +344,6 @@ class App extends Component {
             />
           </div>
         </Dialog>
-
         <Dialog
             title="Vote"
             modal={false}
