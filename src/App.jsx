@@ -63,8 +63,12 @@ class App extends Component {
     const gitBountyCreatorTruffleContract = TruffleContract(GitBountyCreatorJson)
     gitBountyCreatorTruffleContract.setProvider(this.state.web3.currentProvider)
 
+    const gitBountyTruffleContract = TruffleContract(GitBountyJson)
+    gitBountyTruffleContract.setProvider(this.state.web3.currentProvider)
+
     this.setState({
-      gitBountyCreatorContract: gitBountyCreatorTruffleContract
+      gitBountyCreatorContract: gitBountyCreatorTruffleContract,
+      gitBountyContract: gitBountyTruffleContract,
     })
 
     this._loadBounties()
