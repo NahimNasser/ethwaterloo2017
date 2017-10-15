@@ -21,7 +21,6 @@ class App extends Component {
     super(props)
 
     this.state = {
-      bounties: {},
       snackbarMessage: '',
       snackbarOpen: false,
       contributeDialogOpen: false,
@@ -164,7 +163,7 @@ class App extends Component {
                 }
               })
 
-              return null
+              return this._loadBounties()
             })
             .catch((err) => {
               console.error(err)
@@ -283,14 +282,14 @@ class App extends Component {
               )
           }
           <div className='row col-xs-12'>
-            <div className='col-md-4 col-xs-12'>
-              {
-                this.state.issues.map((bounty, i) => {
-                  return (
+            {
+              this.state.issues.map((bounty) => {
+                return (
+                  <div className='col-md-4 col-xs-12'>
                     <Issue
                     style={{
                     }}
-                    key={bounty.key}
+                    key={bounty.addr}
                     { ...bounty }
                     bountyKey={bounty.key}
                     onVoteClick={() => {
@@ -299,11 +298,11 @@ class App extends Component {
                         currentIssueAddress: bounty.addr,
                       })}
                     }
-                  />
+                    />
+                    </div>
                   )
                 })
               }
-            </div>
           </div>
         </section>
         <Snackbar
@@ -318,7 +317,7 @@ class App extends Component {
           open={this.state.contributeDialogOpen}
           actions={actions}
         >
-          <div className="col-xs-10">
+          <div className="col-xs-12">
             <TextField
               id="issue-url"
               value={this.state.contributeDialogData.issueUrl}
@@ -328,7 +327,7 @@ class App extends Component {
             />
           </div>
           <br />
-          <div className="col-xs-10">
+          <div className="col-xs-12">
             <TextField
               id="voters"
               value={this.state.contributeDialogData.voters}
@@ -338,7 +337,7 @@ class App extends Component {
             />
           </div>
           <br />
-          <div className="col-xs-10 row">
+          <div className="col-xs-12">
             <TextField
               id="expiry"
               type="number"
@@ -349,7 +348,6 @@ class App extends Component {
             />
           </div>
         </Dialog>
-
         <Dialog
           title="Vote"
           modal={false}
