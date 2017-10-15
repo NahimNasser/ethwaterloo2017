@@ -311,18 +311,15 @@ class App extends Component {
                         this._handleContribute()
                       }}
                       onVoteClick={() => {
-<<<<<<< HEAD
                         this.setState({
                           voteDialogOpen: true,
                           currentIssueAddress: bounty.addr,
                         })}
-=======
                           this.setState({
                             votecontributeDialogOpen: true,
                             currentIssueAddress: bounty.addr,
                           })
                         }
->>>>>>> 3c3fd5da4bf25b0e98c0cba09db1391a2723458b
                       }
                     />
                     </div>
