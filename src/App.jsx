@@ -95,12 +95,12 @@ class App extends Component {
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
+        var address;
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-              address = addr
-
+            address = addr;
               return new this.state.web3.eth.Contract(GitBountyJson.abi, addr).methods
                 .getAllTheThings().call()
             })
