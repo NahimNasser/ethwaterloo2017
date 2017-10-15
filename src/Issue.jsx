@@ -5,13 +5,13 @@ import RaisedButton from 'material-ui/RaisedButton'
 import Slider from 'material-ui/Slider'
 import * as colors from 'material-ui/styles/colors'
 
-export default class Bounty extends React.Component {
+export default class Issue extends React.Component {
   static propTypes = {
-    bountyKey: PropTypes.string.isRequired,
-    ownerAddress: PropTypes.string.isRequired,
+    key: PropTypes.string.isRequired,
+    owner: PropTypes.string.isRequired,
     currentNumberOfVotes: PropTypes.number.isRequired,
-    totalAmount: PropTypes.number.isRequired,
-    expiryDate: PropTypes.number.isRequired,
+    totalBounty: PropTypes.number.isRequired,
+    expiresAt: PropTypes.number.isRequired,
     voterAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,
     isBountyOpen: PropTypes.bool.isRequired,
     style: PropTypes.object.isRequired,
@@ -22,17 +22,18 @@ export default class Bounty extends React.Component {
     const currentVotePercantage = Math.round(this.props.currentNumberOfVotes / numContributors * 100)
     return (
       <Card
+        className='col-md-6'
         style={this.props.style}
       >
         <CardHeader
-          title={`${this.props.totalAmount.toFixed(2)} ETH`}
-          subtitle={<a href={this.props.bountyKey}>{this.props.bountyKey}</a>}
+          title={`${this.props.totalBounty.toFixed(2)} ETH`}
+          subtitle={<a href={this.props.key}>{this.props.key}</a>}
           actAsExpander={false}
           showExpandableButton={false}
         />
         <CardText expandable={false} style={{ width: '100%' }}>
           <div>{this.bountyOpenComponent()}</div>
-          <div>{new Date(this.props.expiryDate).toDateString()}</div>
+          <div>{new Date(this.props.expiresAt).toDateString()}</div>
           <div>
             There are {numContributors} contributors.
           </div>
@@ -49,10 +50,6 @@ export default class Bounty extends React.Component {
             label='Contribute'
             disabled={!this.props.isBountyOpen}
             primary
-          />
-          <RaisedButton
-            label='Vote'
-            disabled
           />
         </CardActions>
       </Card>

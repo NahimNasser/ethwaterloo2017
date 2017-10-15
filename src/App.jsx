@@ -7,7 +7,7 @@ import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import TextField from 'material-ui/TextField'
 import Snackbar from 'material-ui/Snackbar'
-import Bounty from './Bounty.jsx'
+import Issue from './Issue.jsx'
 
 import { getWeb3 } from './utils'
 import bounties from '../bounties.json'
@@ -33,7 +33,8 @@ class App extends Component {
       disabledBounties: [],
       web3: null,
       gitBountyContract: null,
-      gitBountyCreatorContract: null
+      gitBountyCreatorContract: null,
+      issues: require('./mocks.js').mockBounties,
     }
   }
 
@@ -241,21 +242,15 @@ class App extends Component {
             onClick={_ => this._handleContribute()}
           />
 
-          <div>
+          <div className='row'>
             {
-              Object.keys(this.state.bounties).map((key) => {
-                const bounty = this.state.bounties[key]
-
+              this.state.issues.map((bounty) => {
                 return (
-                  <Bounty
-                    bountyKey={key}
-                    bountyAddress={bounty.addr}
-                    ownerAddress={bounty.owner}
-                    currentNumberOfVotes={bounty.voteProgress}
-                    totalAmount={bounty.payoutAmount}
-                    expiryDate={new Date()}
-                    voterAddresses={[]}
-                    isBountyOpen={true}
+                  <Issue
+                    style={{
+                    }}
+                    key={bounty.key}
+                    {...bounty}
                   />
                 )
               })
