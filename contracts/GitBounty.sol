@@ -22,20 +22,21 @@ contract GitBounty {
     uint256 public totalBounty;
     uint256 public expiresAt;
     address[] public voterAddresses;
-    uint256 public totalVotes;
+    uint256 public numberOfVotersWhoVoted;
     address[] public PRS;
     uint256 public totalPRS;
     uint256 public requiredNumberOfVotes;
     bool public isBountyOpen;
 
     function getAllTheThings() public constant returns(string, address, uint256, uint256, address[], uint256, address[], uint256, uint256, bool ) {
-      return (key, owner, totalBounty, expiresAt, voterAddresses, totalVotes, PRS, totalPRS, requiredNumberOfVotes, isBountyOpen);
+      return (key, owner, totalBounty, expiresAt, voterAddresses, numberOfVotersWhoVoted, PRS, totalPRS, requiredNumberOfVotes, isBountyOpen);
     }
 
     mapping (address => uint256) public contributions;
     mapping (address => bool) public eligibleVotersAddresses;
     mapping (address => uint256) public votes;
     mapping (bytes32 => bool) private hasVotedToAddress;
+    mapping (address => bool) private hasVotedToAtleastOne;
 
     modifier onlyOwner {
         require(msg.sender == owner);
@@ -77,6 +78,10 @@ contract GitBounty {
           // New PR vote
           PRS.push(addr);
           totalPRS++;
+        }
+        if (!hasVotedToAtleastOne[msg.sender]) {
+            numberOfVotersWhoVoted++;
+            hasVotedToAtleastOne[msg.sender] = true;
         }
         addVotePair(msg.sender, addr);
         return doCount(addr);
