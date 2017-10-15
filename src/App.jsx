@@ -21,6 +21,7 @@ class App extends Component {
     super(props)
 
     this.state = {
+      bountyAbi: null,
       snackbarMessage: '',
       snackbarOpen: false,
       contributeDialogOpen: false,
@@ -51,8 +52,8 @@ class App extends Component {
         // Instantiate contract once web3 provided.
         this._instantiateContract()
       })
-      .catch(() => {
-        console.log('Error finding web3.')
+      .catch((e) => {
+        console.log('Error finding web3.', e)
       })
   }
 
@@ -60,11 +61,7 @@ class App extends Component {
     const gitBountyCreatorTruffleContract = TruffleContract(GitBountyCreatorJson)
     gitBountyCreatorTruffleContract.setProvider(this.state.web3.currentProvider)
 
-    const gitBountyTruffleContract = TruffleContract(GitBountyJson)
-    gitBountyTruffleContract.setProvider(this.state.web3.currentProvider)
-
     this.setState({
-      gitBountyContract: gitBountyTruffleContract,
       gitBountyCreatorContract: gitBountyCreatorTruffleContract
     })
 
@@ -104,26 +101,27 @@ class App extends Component {
           .then(addresses => {
             const promises = addresses.map((addr) => {
               address = addr
-              return this.state.gitBountyContract.deployed({ at: addr }).then(inst => {
-                return inst.getAllTheThings()
-              })
+
+              return new this.state.web3.eth.Contract(GitBountyJson.abi, addr).methods
+                .getAllTheThings().call()
             })
 
             return Promise.all(promises)
           })
           .then(results => {
+            console.log(results);
             return results.map((elm, i) => ({
               addr: address,
               key: elm[0] == "" ? `issue-${i}` : elm[0],
-              owner: elm[1], 
-              totalBounty: elm[2].toNumber(), 
-              expiresAt: elm[3].toNumber(), 
-              voterAddresses: elm[4], 
-              totalVotes: elm[5].toNumber(), 
-              solutionAddresses: elm[6], 
-              totalSolutions: elm[7].toNumber(), 
-              requiredNumberOfVotes: elm[8].toNumber(), 
-              isBountyOpen: elm[8].toNumber() > 0,
+              owner: elm[1],
+              totalBounty: parseInt(elm[2]),
+              expiresAt: parseInt(elm[3]),
+              voterAddresses: elm[4],
+              totalVotes: parseInt(elm[5]),
+              solutionAddresses: elm[6],
+              totalSolutions: parseInt(elm[7]),
+              requiredNumberOfVotes: parseInt(elm[8]),
+              isBountyOpen: elm[8],
             }))
           })
           .then(results => {
@@ -284,12 +282,12 @@ class App extends Component {
           }
           title="GitBounty"
         />
-        <section 
-          className={`row col-xs-12 ${this.state.issues.length > 0 ? '' : 'center-xs middle-xs'}`} 
+        <section
+          className={`row col-xs-12 ${this.state.issues.length > 0 ? '' : 'center-xs middle-xs'}`}
           style={{ height: '100%', textAlign: 'center', padding: '25px' }}
         >
           {
-            this.state.issues.length == 0 && 
+            this.state.issues.length == 0 &&
               (
                 <img src="https://cl.ly/2z1w1t2p1p06/hero-world.gif" style={{ paddingTop: 100 }} />
               )
