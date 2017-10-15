@@ -6,10 +6,13 @@ import AppBar from 'material-ui/AppBar'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import TextField from 'material-ui/TextField'
+import Snackbar from 'material-ui/Snackbar'
+import Bounty from './Bounty.jsx'
 
 import { getWeb3 } from './utils'
 import bounties from '../bounties.json'
 import GitBountyJson from '../build/contracts/GitBounty.json'
+import GitBountyCreatorJson from '../build/contracts/GitBountyCreator.json'
 
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 
@@ -18,6 +21,9 @@ class App extends Component {
     super(props)
 
     this.state = {
+      bounties: {},
+      snackbarMessage: '',
+      snackbarOpen: false,
       dialogOpen: false,
       dialogData: {
         issueUrl: "",
@@ -26,7 +32,8 @@ class App extends Component {
       },
       disabledBounties: [],
       web3: null,
-      contract: null
+      gitBountyContract: null,
+      gitBountyCreatorContract: null
     }
   }
 
@@ -46,7 +53,16 @@ class App extends Component {
   }
 
   _instantiateContract() {
-    
+    const gitBountyCreatorTruffleContract = TruffleContract(GitBountyCreatorJson)
+    gitBountyCreatorTruffleContract.setProvider(this.state.web3.currentProvider)
+
+    const gitBountyTruffleContract = TruffleContract(GitBountyJson)
+    gitBountyTruffleContract.setProvider(this.state.web3.currentProvider)
+
+    this.setState({
+      gitBountyContract: gitBountyTruffleContract,
+      gitBountyCreatorContract: gitBountyCreatorTruffleContract
+    })
   }
 
   _handleDialogClose() {
@@ -61,18 +77,61 @@ class App extends Component {
     })
   }
 
-  _handleSubmit() {
+  _loadBounties() {
+    this.state.gitBountyContract.deployed()
+      .then(instance => {
+        this.setState({
+          bounties: instance.bounties
+        })
+      })
+      .catch(console.error)
+  }
 
+  _handleNewBounty() {
+    const data = this.state.dialogData
+
+    this.state.gitBountyCreatorContract.deployed()
+      .then((gitBountyInstance) => {
+        gitBountyInstance
+          .createBounty(
+            this.state.dialogData.issueUrl,
+            this.state.dialogData.voters.split(','), 
+            parseInt(this.state.dialogData.expiresIn) * 60 * 60 * 24
+          )
+          .then(resp => {
+            console.log(resp)
+
+            this.setState({
+              snackbarOpen: true,
+              snackbarMessage: "New bounty created on contract",
+              dialogOpen: false,
+              dialogData: {
+                issueUrl: "",
+                voters: "",
+                expiresIn: ""
+              }
+            })
+
+            return null
+          })
+          .catch((err) => {
+            console.error(err)
+            
+            return new Error("Failed to create new bounty")
+          })
+      })
+      .catch(console.error)
   }
 
   _markVoted() {
-    var bountyInstance;
+    let bountyInstance
 
-    contracts.GitBounty.deployed().then(function (instance) {
-      bountyInstance = instance;
+    this.contract.deployed()
+      .then((instance) => {
+        bountyInstance = instance
 
-      return bountyInstance.getVoters.call();
-    })
+        return bountyInstance.getVoters.call()
+      })
       .then((voters) => {
         voters.forEach(voter => {
           if (voter !== '0x0000000000000000000000000000000000000000') {
@@ -87,25 +146,20 @@ class App extends Component {
       });
   }
 
-  _handleContribute() {
+  _handleContribute(address) {
     web3.eth.getAccounts((error, accounts) => {
       if (error) {
-        console.log(error);
+        console.error(error)
+        return
       }
 
-      const gitBountyTruffleContract = TruffleContract(GitBountyJson)
-      gitBountyTruffleContract.setProvider(this.state.web3.currentProvider)
-
-      gitBountyTruffleContract.deployed()
+      this.state.gitBountyContract.deployed({ at: address })
         .then((contractInstance) => {
-          debugger;
-
           contractInstance
             .addToBounty({from: accounts[0]})
-            .then(_ => {
-              debugger;
-            })
+            .then(console.log)
         })
+        .catch(console.error)
     })
   }
 
@@ -150,7 +204,7 @@ class App extends Component {
         label="Submit"
         primary={true}
         keyboardFocused={true}
-        onClick={_ => this._handleSubmit()}
+        onClick={_ => this._handleNewBounty()}
       />,
     ];
 
@@ -174,6 +228,27 @@ class App extends Component {
             type="button"
             onClick={_ => this._handleContribute()}
           />
+
+          <div>
+            {
+              Object.keys(this.state.bounties).map((key) => {
+                const bounty = this.state.bounties[key]
+
+                return (
+                  <Bounty
+                    bountyKey={key}
+                    bountyAddress={bounty.addr}
+                    ownerAddress={bounty.owner}
+                    currentNumberOfVotes={bounty.voteProgress}
+                    totalAmount={bounty.payoutAmount}
+                    expiryDate={new Date()}
+                    voterAddresses={[]}
+                    isBountyOpen={true}
+                  />
+                )
+              })
+            }
+          </div>
 
           <Dialog
             title="New Bounty"
@@ -208,11 +283,17 @@ class App extends Component {
                 type="number"
                 value={this.state.dialogData.expiresIn}
                 onChange={(ev) => this.setState({ dialogData: { ...this.state.dialogData, expiresIn: ev.target.value } })}
-                hintText="Hours until expiry"
+                hintText="Days until expiry"
                 fullWidth={true}
               />
             </div>
           </Dialog>
+          <Snackbar
+            open={this.state.snackbarOpen}
+            message={this.state.snackbarMessage}
+            autoHideDuration={4000}
+            onRequestClose={_ => this.setState({ snackbarOpen: false, snackbarMessage: '' })}
+          />
         </section>
       </div>
     );
