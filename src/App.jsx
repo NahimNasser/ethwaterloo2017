@@ -93,6 +93,7 @@ class App extends Component {
       votecontributeDialogOpen: true
     })
   }
+
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
@@ -165,7 +166,14 @@ class App extends Component {
                 }
               })
 
-              return this._loadBounties()
+              return null
+            })
+            .then(_ => {
+              setTimeout(() => {
+                this._loadBounties()
+              }, 500)
+
+              return null
             })
             .catch((err) => {
               console.error(err)
@@ -286,10 +294,9 @@ class App extends Component {
             {
               this.state.issues.map((bounty, i) => {
                 return (
-                  <div className='col-md-4 col-xs-12'>
+                  <div className='col-md-4 col-xs-12' style={{height: '200px'}}>
                     <Issue
-                      style={{
-                      }}
+                      style={{}}
                       key={i}
                       { ...bounty }
                       bountyKey={bounty.key}
