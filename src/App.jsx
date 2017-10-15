@@ -101,22 +101,25 @@ class App extends Component {
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
+        var address;
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-              this.setState({
-                bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
-              });
+            address = addr;
+            this.setState({
+              bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
+            });
               return this.state.bounties[addr].methods
-                .getAllTheThings().call().then(data => ({ ...data, addr }))
+                .getAllTheThings().call()
             })
 
             return Promise.all(promises)
           })
           .then(results => {
+            console.log(results);
             return results.map((elm, i) => ({
-              addr: elm.addr,
+              addr: address,
               key: elm[0] == "" ? `issue-${i}` : elm[0],
               owner: elm[1],
               totalBounty: parseInt(elm[2]),
@@ -205,7 +208,8 @@ class App extends Component {
             .then(_ => {
               this.setState({
                 snackbarOpen: true,
-                snackbarMessage: "Thank you for your contribution!"
+                snackbarMessage: "Thank you for your contribution!",
+                voteDialogOpen: false
               })
             })
         .catch(console.error)
@@ -227,7 +231,8 @@ class App extends Component {
           if(isDone) {
             this.setState({
               snackbarOpen: true,
-              snackbarMessage: "Issue completed!"
+              snackbarMessage: "Issue completed!",
+              voteDialogOpen: false
             })
           }
 
@@ -297,7 +302,7 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div className='col-md-4 col-xs-12' style={{height: '350px'}}>
+                  <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
                     <Issue
                       style={{}}
                       key={bounty.addr}
