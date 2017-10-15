@@ -101,35 +101,34 @@ class App extends Component {
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
-        var address;
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-            address = addr;
-            this.setState({
-              bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
-            });
-              return this.state.bounties[addr].methods
-                .getAllTheThings().call()
+              this.setState({
+                bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
+              });
+
+              return this.state.bounties[addr].methods.getAllTheThings().call().then(results => ({ data: results, address: addr }))
             })
 
             return Promise.all(promises)
           })
           .then(results => {
             console.log(results);
-            return results.map((elm, i) => ({
+
+            return results.map(({data, address}, i) => ({
               addr: address,
-              key: elm[0] == "" ? `issue-${i}` : elm[0],
-              owner: elm[1],
-              totalBounty: parseInt(elm[2]),
-              expiresAt: parseInt(elm[3]),
-              voterAddresses: elm[4],
-              totalVotes: parseInt(elm[5]),
-              solutionAddresses: elm[6],
-              totalSolutions: parseInt(elm[7]),
-              requiredNumberOfVotes: parseInt(elm[8]),
-              isBountyOpen: elm[9],
+              key: data[0] == "" ? `issue-${i}` : data[0],
+              owner: data[1],
+              totalBounty: parseInt(data[2]),
+              expiresAt: parseInt(data[3]),
+              voterAddresses: data[4],
+              totalVotes: parseInt(data[5]),
+              solutionAddresses: data[6],
+              totalSolutions: parseInt(data[7]),
+              requiredNumberOfVotes: parseInt(data[8]),
+              isBountyOpen: data[9],
             }))
           })
           .then(results => {
