@@ -210,6 +210,8 @@ class App extends Component {
                 snackbarMessage: "Thank you for your contribution!",
                 voteDialogOpen: false
               })
+
+              return this._loadBounties()
             })
         .catch(console.error)
     })
@@ -301,7 +303,7 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div key={bounty.addr} className='col-md-4 col-xs-12' style={{height: '350px'}}>
+                  <div key={bounty.addr} className='col-md-4 col-xs-12'>
                     <Issue
                       style={{}}
                       { ...bounty }
