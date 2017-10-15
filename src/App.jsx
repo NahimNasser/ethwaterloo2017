@@ -101,25 +101,22 @@ class App extends Component {
   _loadBounties() {
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
-        var address;
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-            address = addr;
-            this.setState({
-              bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
-            });
+              this.setState({
+                bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
+              });
               return this.state.bounties[addr].methods
-                .getAllTheThings().call()
+                .getAllTheThings().call().then(data => ({ ...data, addr }))
             })
 
             return Promise.all(promises)
           })
           .then(results => {
-            console.log(results);
             return results.map((elm, i) => ({
-              addr: address,
+              addr: elm.addr,
               key: elm[0] == "" ? `issue-${i}` : elm[0],
               owner: elm[1],
               totalBounty: parseInt(elm[2]),
@@ -300,7 +297,7 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
+                  <div className='col-md-4 col-xs-12' style={{height: '350px'}}>
                     <Issue
                       style={{}}
                       key={bounty.addr}
