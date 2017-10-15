@@ -1,5 +1,6 @@
 import Axios from 'axios'
 import Web3 from 'web3'
+import _ from 'lodash'
 import TruffleContract from 'truffle-contract'
 import React, { Component } from 'react'
 import AppBar from 'material-ui/AppBar'
@@ -21,6 +22,7 @@ class App extends Component {
     super(props)
 
     this.state = {
+      bounties: {},
       bountyAbi: null,
       snackbarMessage: '',
       snackbarOpen: false,
@@ -105,7 +107,10 @@ class App extends Component {
           .then(addresses => {
             const promises = addresses.map((addr) => {
             address = addr;
-              return new this.state.web3.eth.Contract(GitBountyJson.abi, addr).methods
+            this.setState({
+              bounties: _.assign(this.state.bounties, _.set({}, addr, new this.state.web3.eth.Contract(GitBountyJson.abi, addr)))
+            });
+              return this.state.bounties[addr].methods
                 .getAllTheThings().call()
             })
 
@@ -198,22 +203,14 @@ class App extends Component {
         return null
       }
 
-      this.state.gitBountyContract.deployed({ at: contractAddress })
-        .then((contractInstance) => {
-          contractInstance
-            .addToBounty({
-              from: accounts[0],
-              value: web3.toWei(`${1}`, 'ether'),
-            })
+      this.state.bounties[contractAddress].methods
+            .addToBounty().send({ from: accounts[0], value: web3.toWei(1, 'ether')})
             .then(_ => {
               this.setState({
                 snackbarOpen: true,
                 snackbarMessage: "Thank you for your contribution!"
               })
-
-              return null
             })
-        })
         .catch(console.error)
     })
   }
@@ -228,10 +225,7 @@ class App extends Component {
 
       var account = accounts[0]
 
-      this.state.gitBountyContract.deployed({ at: this.state.currentIssueAddress })
-        .then((instance) => {
-          return instance.vote(issue, { from: account })
-        })
+      this.state.bounties[this.state.currentIssueAddress].methods.vote(issue, { from: account })
         .then((isDone) => {
           if(isDone) {
             this.setState({
