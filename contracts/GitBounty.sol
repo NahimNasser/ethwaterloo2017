@@ -1,42 +1,12 @@
 pragma solidity ^0.4.2;
 
 contract GitBountyCreator {
-    struct Bounty {
-        address addr;
-        uint256 totalVotes;
-        uint256 totalVoters;
-        uint256 payoutAmount;
-    }
-    mapping (string => Bounty) private bounties;
     address[] bountiesAddressesArray;
-    modifier isChild(string key) {
-        require(bounties[key].addr == msg.sender);
-        _;
-    }
     function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable returns(address) {
         GitBounty b = new GitBounty(issueUrl, voters, expiresIn, this);
-        bounties[issueUrl] = Bounty({
-            addr: b,
-            totalVotes: 0,
-            totalVoters: voters.length,
-            payoutAmount: 0
-        });
         b.addToBounty.value(msg.value)();
         bountiesAddressesArray.push(b);
         return b;
-    }
-    function getBounty(string key) public constant returns (address, uint256, uint256, uint256) {
-        return (bounties[key].addr, bounties[key].totalVotes, bounties[key].totalVoters, bounties[key].payoutAmount);
-    }
-    function updateBountyAmount(string key, uint256 newAmount) public isChild(key) {
-        Bounty storage b = bounties[key];
-        b.payoutAmount = newAmount;
-        bounties[key] = b;
-    }
-    function updateVoteProgress(string key, uint256 newTotalVotes) public isChild(key) {
-      Bounty storage b = bounties[key];
-      b.totalVotes = newTotalVotes;
-      bounties[key] = b;
     }
     function getAllBounties() public constant returns (address[]) {
       return bountiesAddressesArray;
@@ -93,7 +63,6 @@ contract GitBounty {
     function addToBounty() public payable bountyOpen {
         contributions[msg.sender] += msg.value;
         totalBounty += msg.value;
-        parent.updateBountyAmount(key, totalBounty);
     }
     function vote(address addr) public isEligibleVoter bountyOpen votedOnce(msg.sender, addr){
         votes[addr] += 1;
