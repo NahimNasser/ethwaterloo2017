@@ -71,7 +71,7 @@ contract GitBounty {
         contributions[msg.sender] += msg.value;
         totalBounty += msg.value;
     }
-    function vote(address addr) public isEligibleVoter bountyOpen votedOnce(msg.sender, addr){
+    function vote(address addr) public isEligibleVoter bountyOpen votedOnce(msg.sender, addr) returns (bool) {
         votes[addr] += 1;
         if (votes[addr] == 1 ) {
           // New PR vote
@@ -79,13 +79,15 @@ contract GitBounty {
           totalPRS++;
         }
         addVotePair(msg.sender, addr);
-        doCount(addr);
+        return doCount(addr);
     }
-    function doCount(address addr) private {
+    function doCount(address addr) private returns (bool) {
         if (votes[addr] >= requiredNumberOfVotes) {
             addr.transfer(totalBounty);
             isBountyOpen = false;
         }
+
+        return isBountyOpen;
     }
     function addVotePair(address voter, address hunter) private {
         hasVotedToAddress[keccak256(voter, hunter)] = true;
