@@ -21,7 +21,6 @@ class App extends Component {
     super(props)
 
     this.state = {
-      bounties: {},
       snackbarMessage: '',
       snackbarOpen: false,
       dialogOpen: false,
@@ -34,7 +33,7 @@ class App extends Component {
       web3: null,
       gitBountyContract: null,
       gitBountyCreatorContract: null,
-      issues: [],
+      issues: []
     }
   }
 
