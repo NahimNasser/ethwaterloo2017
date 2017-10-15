@@ -1,4 +1,5 @@
 pragma solidity ^0.4.2;
+
 contract GitBountyCreator {
     struct Bounty {
         bool isHere;
@@ -12,7 +13,7 @@ contract GitBountyCreator {
         require(bounties[key].isHere);
         _;
     }
-    function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable {
+    function createBounty(string issueUrl, address[] voters, uint256  expiresIn) public payable {
         GitBounty b = new GitBounty(issueUrl, voters, expiresIn, this);
         bounties[issueUrl] = Bounty({
             isHere: true,
