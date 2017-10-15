@@ -302,8 +302,7 @@ class App extends Component {
                 return (
                   <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
                     <Issue
-                      style={{
-                      }}
+                      style={{}}
                       key={bounty.addr}
                       { ...bounty }
                       bountyKey={bounty.key}
