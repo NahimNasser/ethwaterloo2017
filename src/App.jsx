@@ -96,42 +96,42 @@ class App extends Component {
   }
 
   _loadBounties() {
-    let address
     this.state.gitBountyCreatorContract.deployed()
       .then(instance => {
         return instance
           .getAllBounties()
           .then(addresses => {
             const promises = addresses.map((addr) => {
-              address = addr
               return this.state.gitBountyContract.deployed({ at: addr }).then(inst => {
-                return inst.getAllTheThings()
+                return inst.getAllTheThings().then(data => ({ data: data, address: addr }))
               })
             })
 
             return Promise.all(promises)
           })
           .then(results => {
-            return results.map((elm, i) => ({
+            return results.map(({data, address}, i) => ({
               addr: address,
-              key: elm[0] == "" ? `issue-${i}` : elm[0],
-              owner: elm[1], 
-              totalBounty: elm[2].toNumber(), 
-              expiresAt: elm[3].toNumber(), 
-              voterAddresses: elm[4], 
-              totalVotes: elm[5].toNumber(), 
-              solutionAddresses: elm[6], 
-              totalSolutions: elm[7].toNumber(), 
-              requiredNumberOfVotes: elm[8].toNumber(), 
-              isBountyOpen: elm[8].toNumber() > 0,
+              key: data[0] == "" ? `issue-${i}` : data[0],
+              owner: data[1], 
+              totalBounty: data[2].toNumber(), 
+              expiresAt: data[3].toNumber(), 
+              voterAddresses: data[4], 
+              totalVotes: data[5].toNumber(), 
+              solutionAddresses: data[6], 
+              totalSolutions: data[7].toNumber(), 
+              requiredNumberOfVotes: data[8].toNumber(), 
+              isBountyOpen: data[8].toNumber() > 0,
             }))
           })
           .then(results => {
+            console.log(results)
+
             this.setState({
               issues: results
             })
           })
-        .catch(console.error)
+          .catch(console.error)
 
       })
       .catch(console.error)
@@ -271,6 +271,8 @@ class App extends Component {
       />,
     ];
 
+    console.log(this.issues)
+
     return (
       <div style={{ height: '100%', width: '100%' }}>
         <AppBar
@@ -306,10 +308,11 @@ class App extends Component {
                       { ...bounty }
                       bountyKey={bounty.key}
                       onVoteClick={() => {
-                        this.setState({
-                          votecontributeDialogOpen: true,
-                          currentIssueAddress: bounty.addr,
-                        })}
+                          this.setState({
+                            votecontributeDialogOpen: true,
+                            currentIssueAddress: bounty.addr,
+                          })
+                        }
                       }
                     />
                     </div>
@@ -325,6 +328,7 @@ class App extends Component {
           onRequestClose={_ => this.setState({ snackbarOpen: false, snackbarMessage: '' })}
         />
         <Dialog
+          key="new-bounty-dialog"
           title="New Bounty"
           modal={false}
           open={this.state.contributeDialogOpen}
@@ -362,6 +366,7 @@ class App extends Component {
           </div>
         </Dialog>
         <Dialog
+          key="vote-dialog"
           title="Vote"
           modal={false}
           open={this.state.votecontributeDialogOpen}
