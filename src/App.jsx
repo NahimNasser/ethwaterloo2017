@@ -284,7 +284,7 @@ class App extends Component {
               className="new-bounty-button"
             />
           }
-          title="GitBounty"
+          title="DOG - The Open Source Bounty Hunter"
         />
         <section 
           className={`row col-xs-12 ${this.state.issues.length > 0 ? '' : 'center-xs middle-xs'}`} 
@@ -300,7 +300,7 @@ class App extends Component {
             {
               this.state.issues.map((bounty) => {
                 return (
-                  <div className='col-md-4 col-xs-12' style={{height: '200px'}}>
+                  <div className='col-md-4 col-xs-12' style={{height: '300px'}}>
                     <Issue
                       style={{
                       }}

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card'
 import RaisedButton from 'material-ui/RaisedButton'
 import Slider from 'material-ui/Slider'
+import FontIcon from 'material-ui/FontIcon';
+import {red500, yellow500, blue500} from 'material-ui/styles/colors';
+
 import * as colors from 'material-ui/styles/colors'
 
 export default class Issue extends React.Component {
@@ -18,24 +21,24 @@ export default class Issue extends React.Component {
 
   render() {
     const numContributors = this.props.voterAddresses.length
+    // const openBountyIcon = "https://lh3.googleusercontent.com/wdFgfoxO5xFb5s194SbECtHEe-HU3BfM5MqL3896G1esFN02J_aqp5yaQ39-IMHqRjY=w300"
+    const openBountyIcon = "http://gazettereview.com/wp-content/uploads/2016/04/dob-bounty-hunter-updates-253x300.png"
+    const closedBountyIcon = "https://cdn0.iconfinder.com/data/icons/flat-security-icons/512/lock.png"
+    const openBountyCopy = "Open Bounty"
+    const closedBountyCopy = "Bounty Ended"
     return (
       <Card
-        className='col-xs-12'
+        className='col-xs-12 bountyCard'
         style={this.props.style}
       >
-        <CardText expandable={false} style={{ width: '100%' }}>
-          <div style={{
-            fontSize: '300%',
-            color: this.props.isBountyOpen ? colors.green500 : colors.red500,
-          }}>
-            {`${this.props.totalBounty.toFixed(3)} ETH`}
-          </div>
-          <div style={{
-          }}>
-            <a href={this.props.bountyKey}>{this.props.bountyKey}</a>
-          </div>
-          <div>{this.bountyOpenComponent()}</div>
-          <div>{new Date(this.props.expiresAt).toDateString()}</div>
+      <CardHeader
+        title={`${this.props.totalBounty.toFixed(3)} ETH`}
+        titleStyle={{fontSize: '200%'}}
+        subtitle={this.props.isBountyOpen ? openBountyCopy : closedBountyCopy}
+        avatar={this.props.isBountyOpen ? openBountyIcon : closedBountyIcon}
+      />
+        <CardText expandable={false} style={{width: '100%'}}>
+          Github Issue URL: <a href={this.props.bountyKey}>{this.props.bountyKey}</a>
         </CardText>
         <CardActions>
           <RaisedButton
@@ -51,25 +54,6 @@ export default class Issue extends React.Component {
           />
         </CardActions>
       </Card>
-    )
-  }
-
-  bountyOpenComponent = () => {
-    if (this.props.isBountyOpen) {
-      return (
-        <div style={{
-          backgroundColor: colors.green500,
-          display: 'inline-block',
-          padding: '4px',
-        }}>OPEN</div>
-      )
-    }
-    return (
-      <div style={{
-        backgroundColor: colors.red500,
-        display: 'inline-block',
-        padding: '4px',
-      }}>CLOSED</div>
     )
   }
 }
