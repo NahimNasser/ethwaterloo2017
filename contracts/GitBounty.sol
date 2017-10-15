@@ -1,9 +1,8 @@
 pragma solidity ^0.4.2;
 contract GitBountyCreator {
     struct Bounty {
-        bool isHere;
         address addr;
-        uint256 voteProgress;
+        uint256 totalVotes;
         uint256 totalVoters;
         uint256 payoutAmount;
     }
@@ -12,25 +11,29 @@ contract GitBountyCreator {
         require(bounties[key].addr == msg.sender);
         _;
     }
-    function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable {
+    function createBounty(string issueUrl, address[] voters,uint256  expiresIn ) public payable returns(address) {
         GitBounty b = new GitBounty(issueUrl, voters, expiresIn, this);
         bounties[issueUrl] = Bounty({
-            isHere: true,
             addr: b,
-            voteProgress: 0,
+            totalVotes: 0,
             totalVoters: voters.length,
             payoutAmount: 0
         });
         b.addToBounty.value(msg.value)();
-
+        return b;
     }
     function getBounty(string key) public constant returns (address, uint256, uint256, uint256) {
-        return (bounties[key].addr, bounties[key].voteProgress, bounties[key].totalVoters, bounties[key].payoutAmount);
+        return (bounties[key].addr, bounties[key].totalVotes, bounties[key].totalVoters, bounties[key].payoutAmount);
     }
     function updateBountyAmount(string key, uint256 newAmount) public isChild(key) {
         Bounty storage b = bounties[key];
         b.payoutAmount = newAmount;
         bounties[key] = b;
+    }
+    function updateVoteProgress(string key, uint256 newTotalVotes) public isChild(key) {
+      Bounty storage b = bounties[key];
+      b.totalVotes = newTotalVotes;
+      bounties[key] = b;
     }
 }
 
@@ -41,9 +44,12 @@ contract GitBounty {
     uint256 public totalBounty;
     uint256 public expiresAt;
     address[] public voterAddresses;
+    uint256 public totalVotes;
     mapping (address => uint256) public contributions;
     mapping (address => bool) public eligibleVotersAddresses;
     mapping (address => uint256) public votes;
+    address[] public PRS;
+    uint256 public totalPRS;
     uint256 public requiredNumberOfVotes;
     bool public isBountyOpen;
     mapping (bytes32 => bool) private hasVotedToAddress;
@@ -85,6 +91,11 @@ contract GitBounty {
     }
     function vote(address addr) public isEligibleVoter bountyOpen votedOnce(msg.sender, addr){
         votes[addr] += 1;
+        if (votes[addr] == 1 ) {
+          // New PR vote
+          PRS.push(addr);
+          totalPRS++;
+        }
         addVotePair(msg.sender, addr);
         doCount(addr);
     }
